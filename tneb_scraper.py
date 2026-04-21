@@ -29,6 +29,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 DEFAULT_BASE_URL = "https://www.tnebnet.org/qwp/qpay?login_error=1"
 
 
+def is_valid_captcha(value: str) -> bool:
+    value = value.strip()
+    return value.isdigit() and 4 <= len(value) <= 8
+
+
 @dataclass
 class ConsumerRecord:
     consumer_no: str
@@ -116,7 +121,7 @@ class TNEBScraper:
 
         while True:
             captcha = input(f"Enter CAPTCHA digits visible in browser for consumer {consumer_no}: ").strip()
-            if re.fullmatch(r"\d{4,8}", captcha):
+            if is_valid_captcha(captcha):
                 return captcha
             print("Invalid CAPTCHA format. Please enter 4 to 8 digits.")
 
@@ -315,7 +320,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    if args.captcha is not None and not re.fullmatch(r"\d{4,8}", args.captcha):
+    if args.captcha is not None and not is_valid_captcha(args.captcha):
         print("Error: --captcha must be 4 to 8 digits when provided.")
         return 2
 
