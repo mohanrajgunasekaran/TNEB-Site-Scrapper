@@ -47,6 +47,24 @@ dir
 ```
 
 
+### If clone contains only `.gitkeep`
+This means the branch you cloned does not include scraper files yet.
+
+Check branches:
+```bat
+git branch -a
+git fetch --all
+```
+
+If a branch like `work` exists remotely:
+```bat
+git switch -c work origin/work
+dir
+```
+
+If no branch contains `tneb_scraper.py`, the repository owner has not pushed/merged the scraper files yet.
+
+
 ---
 
 ## 2) Create and activate virtual environment (Windows)
