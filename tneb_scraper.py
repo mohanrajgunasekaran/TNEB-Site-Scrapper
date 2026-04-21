@@ -115,17 +115,17 @@ class TNEBScraper:
             return self.fixed_captcha
 
         while True:
-            captcha = input(f"Enter CAPTCHA (5 or 6 digits) visible in browser for consumer {consumer_no}: ").strip()
-            if re.fullmatch(r"\d{5,6}", captcha):
+            captcha = input(f"Enter CAPTCHA digits visible in browser for consumer {consumer_no}: ").strip()
+            if re.fullmatch(r"\d{4,8}", captcha):
                 return captcha
-            print("Invalid CAPTCHA format. Please enter 5 or 6 digits.")
+            print("Invalid CAPTCHA format. Please enter 4 to 8 digits.")
 
     def _fill_captcha(self, captcha: str) -> None:
         input_el = self._find_first(
             [
                 (By.CSS_SELECTOR, "input[name*='capt']"),
                 (By.CSS_SELECTOR, "input[id*='capt']"),
-                (By.XPATH, "//input[@maxlength='5' or @maxlength='6']"),
+                (By.XPATH, "//input[@maxlength='4' or @maxlength='5' or @maxlength='6' or @maxlength='7' or @maxlength='8']"),
                 (By.XPATH, "//label[contains(translate(., 'captcha', 'CAPTCHA'), 'CAPTCHA')]/following::input[1]"),
             ]
         )
@@ -297,7 +297,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--captcha",
         default=None,
-        help="Fixed CAPTCHA (5 or 6 digits; use only if CAPTCHA does not change between queries).",
+        help="Fixed CAPTCHA (4 to 8 digits; use only if CAPTCHA does not change between queries).",
     )
     parser.add_argument(
         "--names",
@@ -315,8 +315,8 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    if args.captcha is not None and not re.fullmatch(r"\d{5,6}", args.captcha):
-        print("Error: --captcha must be 5 or 6 digits when provided.")
+    if args.captcha is not None and not re.fullmatch(r"\d{4,8}", args.captcha):
+        print("Error: --captcha must be 4 to 8 digits when provided.")
         return 2
 
     scraper = TNEBScraper(
