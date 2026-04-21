@@ -31,6 +31,22 @@ dir
 ```
 You should see `requirements.txt` in the output.
 
+### If `cd TNEB-Site-Scrapper` fails (path not found)
+Use one of these to locate the folder:
+
+```bat
+dir %USERPROFILE%\Downloads
+dir %USERPROFILE%\Desktop
+where /r %USERPROFILE% requirements.txt
+```
+
+Then `cd` to the parent folder reported by `where`, for example:
+```bat
+cd C:\Users\egxxmoh\Desktop\TNEB-Site-Scrapper
+dir
+```
+
+
 ---
 
 ## 2) Create and activate virtual environment (Windows)
