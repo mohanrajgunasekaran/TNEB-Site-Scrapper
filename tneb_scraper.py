@@ -126,14 +126,26 @@ class TNEBScraper:
             print("Invalid CAPTCHA format. Please enter 4 to 8 digits.")
 
     def _fill_captcha(self, captcha: str) -> None:
-        input_el = self._find_first(
-            [
-                (By.CSS_SELECTOR, "input[name*='capt']"),
-                (By.CSS_SELECTOR, "input[id*='capt']"),
-                (By.XPATH, "//input[@maxlength='4' or @maxlength='5' or @maxlength='6' or @maxlength='7' or @maxlength='8']"),
-                (By.XPATH, "//label[contains(translate(., 'captcha', 'CAPTCHA'), 'CAPTCHA')]/following::input[1]"),
+        try:
+            input_el = self._find_first(
+                [
+                    (By.CSS_SELECTOR, "input[name*='capt']"),
+                    (By.CSS_SELECTOR, "input[id*='capt']"),
+                    (By.XPATH, "//input[@maxlength='4' or @maxlength='5' or @maxlength='6' or @maxlength='7' or @maxlength='8']"),
+                    (By.XPATH, "//label[contains(translate(., 'captcha', 'CAPTCHA'), 'CAPTCHA')]/following::input[1]"),
+                    (By.XPATH, "(//input[(@type='text' or not(@type)) and not(@type='hidden')])[2]"),
+                ]
+            )
+        except TimeoutException:
+            text_inputs = [
+                el
+                for el in self.driver.find_elements(By.XPATH, "//input[(@type='text' or not(@type)) and not(@type='hidden')]")
+                if el.is_displayed() and el.is_enabled()
             ]
-        )
+            if len(text_inputs) < 2:
+                raise
+            input_el = text_inputs[1]
+
         input_el.clear()
         input_el.send_keys(captcha)
 
