@@ -56,11 +56,13 @@ git branch -a
 git fetch --all
 ```
 
-If a branch like `work` exists remotely:
+Switch to whichever remote branch has scraper files (example shown):
 ```bat
-git switch -c work origin/work
+git switch -c codex/create-web-scraping-script-for-tneb-data origin/codex/create-web-scraping-script-for-tneb-data
 dir
 ```
+
+Or use any other remote branch that contains `tneb_scraper.py` and `requirements.txt`.
 
 If no branch contains `tneb_scraper.py`, the repository owner has not pushed/merged the scraper files yet.
 
