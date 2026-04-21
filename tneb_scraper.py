@@ -55,6 +55,7 @@ class TNEBScraper:
         timeout_seconds: int,
         post_submit_wait: float,
         fixed_captcha: Optional[str] = None,
+        reuse_first_captcha: bool = True,
     ) -> None:
         self.base_url = base_url
         self.desired_names = [n.strip().lower() for n in desired_names if n.strip()]
@@ -63,6 +64,8 @@ class TNEBScraper:
         self.timeout_seconds = timeout_seconds
         self.post_submit_wait = post_submit_wait
         self.fixed_captcha = fixed_captcha.strip() if fixed_captcha else None
+        self.reuse_first_captcha = reuse_first_captcha
+        self.session_captcha: Optional[str] = self.fixed_captcha
         self.driver = self._build_driver(headless=headless)
         self.wait = WebDriverWait(self.driver, timeout_seconds)
         self.records: List[ConsumerRecord] = []
@@ -119,12 +122,14 @@ class TNEBScraper:
         input_el.send_keys(consumer_no)
 
     def _get_captcha_for_iteration(self, consumer_no: str) -> str:
-        if self.fixed_captcha:
-            return self.fixed_captcha
+        if self.session_captcha:
+            return self.session_captcha
 
         while True:
             captcha = input(f"Enter CAPTCHA digits visible in browser for consumer {consumer_no}: ").strip()
             if is_valid_captcha(captcha):
+                if self.reuse_first_captcha:
+                    self.session_captcha = captcha
                 return captcha
             print("Invalid CAPTCHA format. Please enter 4 to 8 digits.")
 
@@ -329,6 +334,11 @@ def parse_args() -> argparse.Namespace:
         help="Fixed CAPTCHA (4 to 8 digits; use only if CAPTCHA does not change between queries).",
     )
     parser.add_argument(
+        "--ask-each-captcha",
+        action="store_true",
+        help="Prompt for CAPTCHA on every consumer number instead of reusing first valid CAPTCHA.",
+    )
+    parser.add_argument(
         "--names",
         nargs="*",
         default=[],
@@ -358,6 +368,7 @@ def main() -> int:
         timeout_seconds=args.timeout,
         post_submit_wait=args.post_submit_wait,
         fixed_captcha=args.captcha,
+        reuse_first_captcha=not args.ask_each_captcha,
     )
 
     try:

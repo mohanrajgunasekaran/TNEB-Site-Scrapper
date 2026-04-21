@@ -98,13 +98,18 @@ python tneb_scraper.py --start 02302013170 --end 02302013180 --names "SIVASA" "R
 
 What happens:
 - Browser opens the TNEB page.
-- For each consumer number, script asks CAPTCHA digits in terminal.
+- Script asks CAPTCHA once, then reuses it for remaining consumer numbers by default.
 - It submits, extracts data, goes back without refresh, and continues.
 
 ### Optional fixed CAPTCHA mode
 (Use only if one CAPTCHA is valid for repeated requests; accepts 4 to 8 digits.)
 ```bat
 python tneb_scraper.py --start 02302013170 --end 02302013180 --captcha 123456 --names "SIVASA" "RAMESH"
+```
+
+### Optional: ask CAPTCHA every time
+```bat
+python tneb_scraper.py --start 02302013170 --end 02302013180 --names "SIVASA" "RAMESH" --ask-each-captcha
 ```
 
 ---
