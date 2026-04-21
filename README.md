@@ -93,7 +93,7 @@ pip install -r requirements.txt
 
 ### Recommended (manual CAPTCHA each request)
 ```bat
-python tneb_scraper.py --start 02302013170 --end 02302013180 --names "SIVASA" "RAMESH" --output tneb_consumers.xlsx --delay 2
+python tneb_scraper.py --start 02302013170 --end 02302013180 --names "SIVASA" "RAMESH" --output tneb_consumers.xlsx --delay 0.4 --post-submit-wait 0.35
 ```
 
 What happens:
@@ -126,3 +126,9 @@ Each consumer attempt is written as a new row.
 - Respect TNEB website terms and applicable laws.
 - Keep delay reasonable to avoid overloading the service.
 - CAPTCHA solving is not automated.
+
+
+## Speed tuning
+- Use smaller delay values for faster processing (example: `--delay 0.2`).
+- Use a small `--post-submit-wait` value (example: `--post-submit-wait 0.2`) if your network/browser is stable.
+- If the site starts rejecting requests or showing errors, increase delay gradually.

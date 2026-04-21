@@ -53,6 +53,7 @@ class TNEBScraper:
         headless: bool,
         delay_seconds: float,
         timeout_seconds: int,
+        post_submit_wait: float,
         fixed_captcha: Optional[str] = None,
     ) -> None:
         self.base_url = base_url
@@ -60,6 +61,7 @@ class TNEBScraper:
         self.output_file = output_file
         self.delay_seconds = delay_seconds
         self.timeout_seconds = timeout_seconds
+        self.post_submit_wait = post_submit_wait
         self.fixed_captcha = fixed_captcha.strip() if fixed_captcha else None
         self.driver = self._build_driver(headless=headless)
         self.wait = WebDriverWait(self.driver, timeout_seconds)
@@ -68,6 +70,7 @@ class TNEBScraper:
     @staticmethod
     def _build_driver(headless: bool) -> WebDriver:
         options = Options()
+        options.page_load_strategy = "eager"
         if headless:
             options.add_argument("--headless=new")
         options.add_argument("--window-size=1400,1000")
@@ -224,13 +227,22 @@ class TNEBScraper:
         self.driver.back()
         self._wait_for_form_ready()
 
+    def _return_to_form(self) -> None:
+        try:
+            WebDriverWait(self.driver, 2).until(
+                lambda d: len(d.find_elements(By.XPATH, "//input[(@type='text' or not(@type)) and not(@type='hidden') and not(@disabled)]")) >= 2
+            )
+            return
+        except Exception:
+            self._go_back_without_refresh()
+
     def process_consumer(self, consumer_no: str) -> None:
         self._fill_consumer_no(consumer_no)
         captcha = self._get_captcha_for_iteration(consumer_no)
         self._fill_captcha(captcha)
         self._submit()
 
-        time.sleep(1.2)
+        time.sleep(self.post_submit_wait)
         record = self._parse_result(consumer_no)
 
         if not self._name_matches(record.consumer_name):
@@ -242,7 +254,7 @@ class TNEBScraper:
         # Requirement: each search should create a row.
         self.records.append(record)
 
-        self._go_back_without_refresh()
+        self._return_to_form()
         time.sleep(self.delay_seconds)
 
     def run_range(self, start: str, end: str) -> None:
@@ -271,7 +283,7 @@ class TNEBScraper:
                     )
                 )
                 try:
-                    self._go_back_without_refresh()
+                    self._return_to_form()
                 except Exception:
                     self.driver.get(self.base_url)
                     self._wait_for_form_ready()
@@ -324,7 +336,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--base-url", default=DEFAULT_BASE_URL)
     parser.add_argument("--output", default="tneb_consumers.xlsx")
-    parser.add_argument("--delay", type=float, default=1.5, help="Delay between searches (seconds).")
+    parser.add_argument("--delay", type=float, default=0.4, help="Delay between searches (seconds).")
+    parser.add_argument("--post-submit-wait", type=float, default=0.35, help="Small wait after submit before parsing (seconds).")
     parser.add_argument("--timeout", type=int, default=12)
     parser.add_argument("--headless", action="store_true")
     return parser.parse_args()
@@ -343,6 +356,7 @@ def main() -> int:
         headless=args.headless,
         delay_seconds=args.delay,
         timeout_seconds=args.timeout,
+        post_submit_wait=args.post_submit_wait,
         fixed_captcha=args.captcha,
     )
 
