@@ -1,41 +1,80 @@
 # TNEB Site Scraper
 
-## 1) Install dependencies
-```bash
+## Quick fix for your error
+If you see:
+`ERROR: Could not open requirements file: [Errno 2] No such file or directory: 'requirements.txt'`
+it means you are running commands in the wrong folder.
+
+You must first `cd` into the folder that contains these files:
+- `tneb_scraper.py`
+- `requirements.txt`
+
+---
+
+## 1) Open terminal in project folder
+
+### If you downloaded as ZIP
+```bat
+cd %USERPROFILE%\Downloads
+cd TNEB-Site-Scrapper
+```
+
+### If you cloned with git
+```bat
+git clone <your-repo-url>
+cd TNEB-Site-Scrapper
+```
+
+Verify files exist:
+```bat
+dir
+```
+You should see `requirements.txt` in the output.
+
+---
+
+## 2) Create and activate virtual environment (Windows)
+
+```bat
 python -m venv .venv
-source .venv/bin/activate
+.venv\Scripts\activate
+```
+
+> `source .venv/bin/activate` is Linux/macOS syntax. On Windows CMD, use `.venv\Scripts\activate`.
+
+---
+
+## 3) Install dependencies
+
+```bat
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-> You also need Google Chrome and a compatible ChromeDriver available in PATH.
+---
 
-## 2) Run the script
+## 4) Run the scraper
 
 ### Recommended (manual CAPTCHA each request)
-```bash
-python tneb_scraper.py \
-  --start 02302013170 \
-  --end 02302013180 \
-  --names "SIVASA" "RAMESH" \
-  --output tneb_consumers.xlsx \
-  --delay 2
+```bat
+python tneb_scraper.py --start 02302013170 --end 02302013180 --names "SIVASA" "RAMESH" --output tneb_consumers.xlsx --delay 2
 ```
 
-- Browser opens TNEB page.
-- For each consumer number, read the CAPTCHA shown in browser and enter it in terminal.
-- Script submits, captures details, goes back using browser history, then continues to next consumer number.
+What happens:
+- Browser opens the TNEB page.
+- For each consumer number, script asks CAPTCHA in terminal.
+- It submits, extracts data, goes back without refresh, and continues.
 
-### Fixed CAPTCHA mode (only if same CAPTCHA is valid repeatedly)
-```bash
-python tneb_scraper.py \
-  --start 02302013170 \
-  --end 02302013180 \
-  --captcha 123456 \
-  --names "SIVASA" "RAMESH"
+### Optional fixed CAPTCHA mode
+(Use only if one CAPTCHA is valid for repeated requests.)
+```bat
+python tneb_scraper.py --start 02302013170 --end 02302013180 --captcha 123456 --names "SIVASA" "RAMESH"
 ```
 
-## 3) Output format
-Excel file contains columns:
+---
+
+## 5) Output
+Excel file columns:
 - Consumer No
 - Consumer Name
 - Consumer Address
@@ -43,9 +82,11 @@ Excel file contains columns:
 - Due Date
 - Info
 
-Each consumer number attempted is written as a new row. If a name does not match the `--names` filter, it is still included with `NAME_MISMATCH` in `Info`.
+Each consumer attempt is written as a new row.
 
-## 4) Notes
-- Respect TNEB website terms and legal requirements.
-- Keep delays reasonable to avoid overloading the service.
+---
+
+## Notes
+- Respect TNEB website terms and applicable laws.
+- Keep delay reasonable to avoid overloading the service.
 - CAPTCHA solving is not automated.
